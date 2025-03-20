@@ -1,0 +1,33 @@
+spring:
+
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/shortener
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database: postgresql
+    hibernate:
+      ddl-auto: create
+    open-in-view: false
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+security:
+  login-url: /api/v1/auth/login
+  secret-key: asd9asdkJASD9ASUDASKDJASD0dslj
+  token-expiration-time: 300000
+  token-prefix: "Bearer "
+
+
+logging:
+  level:
+    demo.muhsener01: TRACE
+    org.springframework.security: TRACE
+
+application:
+  properties:
+    base-domain: http://localhost:8080
