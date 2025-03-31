@@ -1,7 +1,7 @@
 package demo.muhsener01.urlshortener.domain.entity.expiration;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import demo.muhsener01.urlshortener.domain.entity.ShortenedUrl;
+import demo.muhsener01.urlshortener.domain.entity.ShortURL;
 import demo.muhsener01.urlshortener.exception.UrlExpiredException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,18 +25,19 @@ public class AfterHoursPolicy extends ExpirationPolicy {
     }
 
     @Override
-    public void initialize(ShortenedUrl url) {
+    public void initialize(ShortURL url) {
         this.type = "after-hours";
         if (expiresAt == null) {
             expiresAt = LocalDateTime.now().plusHours(afterHours);
+//            expiresAt = LocalDateTime.now().plusSeconds(2);
         }
     }
 
     @Override
-    public void apply(ShortenedUrl shortenedUrl) {
+    public void apply(ShortURL shortURL) {
         if (expiresAt.isBefore(LocalDateTime.now())) {
-            shortenedUrl.expire();
-            throw new UrlExpiredException(shortenedUrl.getShortenCode());
+            shortURL.expire();
+            throw new UrlExpiredException(shortURL.getId());
         }
 
 

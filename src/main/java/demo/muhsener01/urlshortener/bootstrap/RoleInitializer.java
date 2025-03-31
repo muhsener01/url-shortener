@@ -1,7 +1,7 @@
 package demo.muhsener01.urlshortener.bootstrap;
 
 import demo.muhsener01.urlshortener.domain.entity.Role;
-import demo.muhsener01.urlshortener.domain.entity.RoleName;
+import demo.muhsener01.urlshortener.domain.enums.RoleName;
 import demo.muhsener01.urlshortener.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

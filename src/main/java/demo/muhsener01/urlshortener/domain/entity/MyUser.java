@@ -29,9 +29,6 @@ public class MyUser extends BaseEntity<UUID> {
             inverseJoinColumns = @JoinColumn(name = "role_id"),
             uniqueConstraints = @UniqueConstraint(name = "primary_key_userId_roleId", columnNames = {"user_id", "role_id"}))
     private List<Role> roles;
-//    private String emailVerificationToken;
-//    private LocalDateTime tokenExpiresAt;
-//    private boolean enabled;
 
 
     private MyUser(Builder builder) {
@@ -42,9 +39,7 @@ public class MyUser extends BaseEntity<UUID> {
         email = builder.email;
         password = builder.password;
         this.roles = builder.roles;
-//        setEmailVerificationToken(builder.emailVerificationToken);
-//        setTokenExpiresAt(builder.tokenExpiresAt);
-//        setEnabled(builder.enabled);
+
 
         if (id == null) {
             initialize();
@@ -74,9 +69,6 @@ public class MyUser extends BaseEntity<UUID> {
         private String email;
         private String password;
         private List<Role> roles;
-//        private String emailVerificationToken;
-//        private LocalDateTime tokenExpiresAt;
-//        private boolean enabled;
 
         private Builder() {
         }
@@ -116,20 +108,6 @@ public class MyUser extends BaseEntity<UUID> {
             return this;
         }
 
-//        public Builder emailVerificationToken(String val) {
-//            emailVerificationToken = val;
-//            return this;
-//        }
-//
-//        public Builder tokenExpiresAt(LocalDateTime val) {
-//            tokenExpiresAt = val;
-//            return this;
-//        }
-//
-//        public Builder enabled(boolean val) {
-//            enabled = val;
-//            return this;
-//        }
 
         public MyUser build() {
             return new MyUser(this);

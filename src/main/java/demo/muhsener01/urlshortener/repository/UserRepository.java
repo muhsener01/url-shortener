@@ -1,20 +1,14 @@
 package demo.muhsener01.urlshortener.repository;
 
 import demo.muhsener01.urlshortener.domain.entity.MyUser;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
 
-@Repository
-public interface UserRepository extends JpaRepository<MyUser, UUID> {
-
+public interface UserRepository {
 
     boolean existsByUsernameOrEmail(String username, String email);
 
+    MyUser save(MyUser user);
 
-    @Query("SELECT u from MyUser u LEFT JOIN FETCH u.roles WHERE u.username = :username")
     Optional<MyUser> findByUsername(String username);
 }

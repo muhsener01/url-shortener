@@ -1,11 +1,13 @@
 package demo.muhsener01.urlshortener.mapper;
 
 import demo.muhsener01.urlshortener.ApplicationProperties;
-import demo.muhsener01.urlshortener.domain.entity.ShortenedUrl;
+import demo.muhsener01.urlshortener.command.UpdateLinkCommand;
+import demo.muhsener01.urlshortener.domain.entity.ShortURL;
 import demo.muhsener01.urlshortener.domain.entity.expiration.AfterHoursPolicy;
 import demo.muhsener01.urlshortener.domain.entity.expiration.ExpirationPolicy;
 import demo.muhsener01.urlshortener.domain.entity.expiration.SingleUsePolicy;
 import demo.muhsener01.urlshortener.domain.entity.expiration.UntilRemovedPolicy;
+import demo.muhsener01.urlshortener.domain.factory.ExpirationPolicyFactory;
 import demo.muhsener01.urlshortener.io.response.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -18,9 +20,9 @@ public class LinkMapper {
 
     private final ApplicationProperties applicationProperties;
 
-    public LinkResponse toResponse(ShortenedUrl url) {
+    public LinkResponse toResponse(ShortURL url) {
         return new LinkResponse(
-                applicationProperties.getBaseDomain() + "/" + url.getShortenCode(),
+                applicationProperties.getBaseDomain() + "/" + url.getId(),
                 url.getOriginalUrl(),
                 url.getStatus().name(),
                 expirationResponse(url.getExpirationPolicy())
@@ -28,7 +30,7 @@ public class LinkMapper {
 
     }
 
-    public List<LinkResponse> toResponse(List<ShortenedUrl> urls) {
+    public List<LinkResponse> toResponse(List<ShortURL> urls) {
         return urls.stream()
                 .map(this::toResponse)
                 .toList();
@@ -44,5 +46,12 @@ public class LinkMapper {
             case null, default ->
                     throw new IllegalArgumentException("Unknown policy type: " + policy.getClass().getSimpleName());
         };
+    }
+
+    public void merge(UpdateLinkCommand command, ShortURL shortURL) {
+        shortURL.setStatus(command.getStatus());
+        shortURL.setExpirationPolicy(ExpirationPolicyFactory.create(command.getExpirationPolicy() , command.getAfterHours()));
+        shortURL.setOriginalUrl(command.getOriginalUrl());
+
     }
 }

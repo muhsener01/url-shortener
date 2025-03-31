@@ -1,9 +1,10 @@
-package demo.muhsener01.urlshortener.config;
+package demo.muhsener01.urlshortener.security;
 
 import demo.muhsener01.urlshortener.repository.RoleRepository;
-import demo.muhsener01.urlshortener.repository.UserRepository;
-import demo.muhsener01.urlshortener.security.SecurityConstants;
+import demo.muhsener01.urlshortener.repository.jpa.UserJpaRepository;
+import demo.muhsener01.urlshortener.repository.impl.UserRepositoryImpl;
 import demo.muhsener01.urlshortener.security.filter.JwtAuthenticationFilter;
+import demo.muhsener01.urlshortener.security.handler.CustomAuthEntryPoint;
 import demo.muhsener01.urlshortener.security.handler.CustomAuthFailureHandler;
 import demo.muhsener01.urlshortener.security.handler.CustomAuthenticationSuccessHandler;
 import demo.muhsener01.urlshortener.service.impl.UserServiceImpl;
@@ -23,6 +24,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Slf4j
 @Configuration
@@ -30,9 +36,10 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 public class SecurityConfig {
 
 
-    private final UserRepository userRepository;
+    private final UserJpaRepository userJpaRepository;
     private final RoleRepository roleRepository;
     private final SecurityConstants securityConstants;
+    private final UserRepositoryImpl userRepositoryImpl;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,7 +47,7 @@ public class SecurityConfig {
     }
 
     public UserDetailsService userDetailsService() {
-        return new UserServiceImpl(userRepository, passwordEncoder(), roleRepository);
+        return new UserServiceImpl(passwordEncoder(), roleRepository, userRepositoryImpl);
     }
 
     @Bean
@@ -60,20 +67,37 @@ public class SecurityConfig {
 
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-up").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/signup").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/signup").permitAll()
-                                .requestMatchers("/error").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/**").permitAll()
-                                .anyRequest().authenticated()
+                                auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/signup").permitAll()
+
+
+                                        .requestMatchers(HttpMethod.GET, "/signup").permitAll()
+//                                .requestMatchers(HttpMethod.POST, "/signup").permitAll()
+                                        .requestMatchers("/error").permitAll()
+                                        .requestMatchers(HttpMethod.GET, "/**").permitAll()
+                                        .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authenticationManager(authenticationManager)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .addFilterBefore(new RateLimitFilter(), DisableEncodeUrlFilter.class)
                 .addFilter(loginFilter)
-                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager, securityConstants), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager, new CustomAuthEntryPoint(), securityConstants), BasicAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(false);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }

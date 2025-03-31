@@ -1,21 +1,21 @@
 package demo.muhsener01.urlshortener.domain.entity.expiration;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import demo.muhsener01.urlshortener.domain.entity.LinkStatus;
-import demo.muhsener01.urlshortener.domain.entity.ShortenedUrl;
+import demo.muhsener01.urlshortener.domain.enums.LinkStatus;
+import demo.muhsener01.urlshortener.domain.entity.ShortURL;
 import demo.muhsener01.urlshortener.exception.NotResolvableException;
 
 @JsonTypeName("until-removed")
 public class UntilRemovedPolicy extends ExpirationPolicy {
 
     @Override
-    public void initialize(ShortenedUrl url) {
+    public void initialize(ShortURL url) {
         this.type = "until-removed";
     }
 
     @Override
-    public void apply(ShortenedUrl shortenedUrl) {
-        if (!shortenedUrl.getStatus().equals(LinkStatus.ACTIVE))
+    public void apply(ShortURL shortURL) {
+        if (!shortURL.getStatus().equals(LinkStatus.ACTIVE))
             throw new NotResolvableException("Link is not active!");
     }
 

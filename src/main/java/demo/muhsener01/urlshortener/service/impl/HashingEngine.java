@@ -1,6 +1,7 @@
 package demo.muhsener01.urlshortener.service.impl;
 
-import demo.muhsener01.urlshortener.repository.ShortenedUrlRepository;
+import demo.muhsener01.urlshortener.repository.UrlRepository;
+import demo.muhsener01.urlshortener.repository.jpa.UrlJpaRepository;
 import demo.muhsener01.urlshortener.service.Engine;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +17,13 @@ import java.util.UUID;
 public class HashingEngine implements Engine {
 
 
-    private final ShortenedUrlRepository shortenedUrlRepository;
+    private final UrlRepository urlRepository;
 
 
     @Override
     public String generateUniqueKey(String longUrl) {
         String hash = hash(longUrl + System.currentTimeMillis()).substring(0, 7);
-        while (shortenedUrlRepository.existsByShortenCode(hash)) {
+        while (urlRepository.existsById(hash)) {
             hash = hash(hash + UUID.randomUUID()).substring(0, 7);
         }
 

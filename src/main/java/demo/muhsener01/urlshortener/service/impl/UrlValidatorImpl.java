@@ -1,11 +1,11 @@
 package demo.muhsener01.urlshortener.service.impl;
 
 import demo.muhsener01.urlshortener.exception.InvalidUrlException;
-import demo.muhsener01.urlshortener.service.UrlValidatorService;
+import demo.muhsener01.urlshortener.service.UrlValidator;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UrlValidatorServiceImpl implements UrlValidatorService {
+public class UrlValidatorImpl implements UrlValidator {
 
     private static final String URL_REGEX = "^(http://|https://).*";
 

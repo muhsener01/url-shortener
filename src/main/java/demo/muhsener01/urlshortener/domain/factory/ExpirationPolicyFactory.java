@@ -10,7 +10,7 @@ public class ExpirationPolicyFactory {
     public static ExpirationPolicy create(String type, int afterHours) {
         String lowerCase = type.toLowerCase();
         return switch (lowerCase) {
-            case "single-view" -> new SingleUsePolicy();
+            case "single-use" -> new SingleUsePolicy();
             case "after-hours" -> new AfterHoursPolicy(afterHours);
             case "until-removed" -> new UntilRemovedPolicy();
             default -> throw new IllegalArgumentException("Unknown expiration policy type: " + type);

@@ -1,5 +1,6 @@
 package demo.muhsener01.urlshortener.domain.entity;
 
+import demo.muhsener01.urlshortener.domain.enums.RoleName;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 

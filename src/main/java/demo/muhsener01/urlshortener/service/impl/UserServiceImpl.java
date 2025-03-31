@@ -4,7 +4,8 @@ import demo.muhsener01.urlshortener.command.SignUpCommand;
 import demo.muhsener01.urlshortener.command.response.SignUpResponse;
 import demo.muhsener01.urlshortener.domain.entity.MyUser;
 import demo.muhsener01.urlshortener.domain.entity.Role;
-import demo.muhsener01.urlshortener.domain.entity.RoleName;
+import demo.muhsener01.urlshortener.domain.enums.RoleName;
+import demo.muhsener01.urlshortener.exception.RoleNotFoundException;
 import demo.muhsener01.urlshortener.exception.UserAlreadyExistsException;
 import demo.muhsener01.urlshortener.repository.RoleRepository;
 import demo.muhsener01.urlshortener.repository.UserRepository;
@@ -23,9 +24,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -43,9 +44,8 @@ public class UserServiceImpl implements UserService {
                 .roles(List.of(userRole))
                 .build();
 
-
         MyUser savedUser = userRepository.save(myUser);
-        return new SignUpResponse(savedUser.getId(), savedUser.getUsername(), savedUser.getEmail());
+        return new SignUpResponse(savedUser.getId(), savedUser.getEmail(), savedUser.getUsername());
     }
 
 
@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
 
     private Role fetchUserRole() {
         return roleRepository.findById(RoleName.USER.name()).orElseThrow(() ->
-                new IllegalStateException("User role not found!!"));
+                new RoleNotFoundException("id", RoleName.USER.name()));
     }
 
     @Override

@@ -16,7 +16,8 @@ public class CustomAuthFailureHandler implements AuthenticationFailureHandler {
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        GlobalExceptionHandler.ErrorResponse errorResponse = new GlobalExceptionHandler.ErrorResponse(LocalDateTime.now(), 401, request.getRequestURI(), exception.getMessage());
+        GlobalExceptionHandler.ErrorResponse errorResponse =
+                new GlobalExceptionHandler.ErrorResponse(LocalDateTime.now(), 401, request.getRequestURI(), exception.getMessage());
 
 
         String body = JsonUtils.convertToJson(errorResponse);
