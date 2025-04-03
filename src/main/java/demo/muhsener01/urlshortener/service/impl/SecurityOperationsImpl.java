@@ -15,13 +15,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 
 
     public UUID getAuthenticatedUserId() throws AuthenticationRequiredException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-            throw new AuthenticationRequiredException("Authentication is required!");
-        }
-
-        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
-        return principal.getId();
+        return getAuthenticatedPrincipal().getId();
 
     }
 

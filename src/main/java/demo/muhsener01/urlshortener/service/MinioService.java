@@ -47,9 +47,9 @@ public class MinioService {
     }
 
 
-    public String putObject(MultipartFile multipartFile) {
+    public String putObject(String uniqueKey, MultipartFile multipartFile) {
         try (InputStream inputStream = multipartFile.getInputStream()) {
-            String objectName = multipartFile.getOriginalFilename();
+            String objectName = multipartFile.getOriginalFilename() + "-" + uniqueKey;
 
             minioClient.putObject(
                     PutObjectArgs.builder()

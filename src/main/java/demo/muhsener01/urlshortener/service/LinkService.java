@@ -13,7 +13,7 @@ public interface LinkService {
 
     ShortURL findById(String code);
 
-    List<ShortURL> findAllByUserId(int page, int limit);
+    List<ShortURL> findAllOfAuthenticatedUser(int page, int limit);
 
     ShortURL deleteById(String urlCode);
 
@@ -23,10 +23,8 @@ public interface LinkService {
 
     ShorteningResponse shortenText(ShortenCommand command);
 
-    ShorteningResponse shortenImage(ShortenCommand command , MultipartFile multipartFile);
+    ShorteningResponse shortenImage(ShortenCommand command, MultipartFile multipartFile);
 
 
-    String resolve(String shortenCode);
-
-    ResolveResponse resolve2(String shortenCode);
+    ResolveResponse resolve(String shortenCode);
 }

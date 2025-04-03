@@ -1,17 +1,26 @@
 package demo.muhsener01.urlshortener.io.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
 public class LinkResponse {
+    @Schema(example = "abcs342")
     private String id;
+    @Schema(example = "[ URL || IMAGE || TEXT ]")
     private String type;
+    @Schema(example = "https://www.shortenly.com/abcs342")
     private String shortLink;
+
+    @Schema(example = "https://www.instragram.com")
     private String originalLink;
+    @Schema(example = "[ ACTIVE || PASSIVE || EXPIRED || REMOVED ]")
     private String status;
+
     private LocalDateTime createdAt;
+
     private ExpirationResponse expiration;
 
 

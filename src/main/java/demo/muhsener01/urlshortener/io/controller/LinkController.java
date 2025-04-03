@@ -1,5 +1,6 @@
 package demo.muhsener01.urlshortener.io.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import demo.muhsener01.urlshortener.command.ShortenCommand;
 import demo.muhsener01.urlshortener.command.UpdateLinkCommand;
 import demo.muhsener01.urlshortener.command.response.ShorteningResponse;
@@ -8,10 +9,11 @@ import demo.muhsener01.urlshortener.io.response.LinkResponse;
 import demo.muhsener01.urlshortener.io.response.ResolveResponse;
 import demo.muhsener01.urlshortener.mapper.LinkMapper;
 import demo.muhsener01.urlshortener.service.LinkService;
-import demo.muhsener01.urlshortener.service.SecurityOperations;
+import demo.muhsener01.urlshortener.springdoc.*;
 import demo.muhsener01.urlshortener.utils.JsonUtils;
-import io.minio.MinioClient;
-import jakarta.validation.constraints.PositiveOrZero;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,115 +29,106 @@ public class LinkController {
 
     private final LinkService linkService;
     private final LinkMapper linkMapper;
-    private final SecurityOperations securityOperations;
-    private MinioClient minioClient;
 
 
-//    @PostMapping(value = "/test",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public void test(@RequestParam("file") MultipartFile multipartFile){
-//        System.out.println("Name: " + multipartFile.getOriginalFilename());
-//        System.out.println("Size: " + multipartFile.getSize());
-//        System.out.println("Type: " + multipartFile.getContentType());
-//
-//
-//    }
-
-
+    @ShortenEndpointSpringDoc
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ShorteningResponse> shorten(@RequestParam("type") String inputType, @RequestParam("body") String bodyJson,
-                                                      @RequestParam(value = "file", required = false) MultipartFile multipartFile) {
+    public ResponseEntity<ShorteningResponse> shorten(
+            @Parameter(description = "The type of the input to shorten (url, text, image)", required = true, example = "url")
+            @RequestParam("type") String inputType,
+            @Parameter(description = "JSON representation of the shorten command", required = true, content = @Content(schema = @Schema(implementation = ShortenCommand.class)))
+            @RequestParam("body") String bodyJson,
+            @Parameter(description = "Optional file for image shortening (only required when type=image)")
+            @RequestParam(value = "file", required = false) MultipartFile multipartFile) {
 
-        ShortenCommand command = JsonUtils.convertToObject(bodyJson, ShortenCommand.class);
+        ShortenCommand command = null;
+        try {
+            command = JsonUtils.convertToObject(bodyJson, ShortenCommand.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid json format.");
+        }
 
 
         ShorteningResponse response = null;
-        if (inputType.equalsIgnoreCase("url")) {
+        if (inputType.equalsIgnoreCase("url"))
             response = linkService.shortenUrl(command);
-        } else if (inputType.equalsIgnoreCase("text")) {
+        else if (inputType.equalsIgnoreCase("text"))
             response = linkService.shortenText(command);
-        } else if (inputType.equalsIgnoreCase("image")) {
+        else if (inputType.equalsIgnoreCase("image")) {
+            if (multipartFile == null)
+                throw new IllegalArgumentException("Multipart file cannot be null when type=image");
+
             response = linkService.shortenImage(command, multipartFile);
-        } else {
+        } else
             throw new IllegalArgumentException("Invalid operation type: " + inputType);
-        }
 
 
         return ResponseEntity.ok(response);
     }
 
 
-//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ResponseEntity<ShorteningResponse> shorten(@RequestParam("type") String inputType, @RequestBody ShortenCommand command, @RequestParam(value = "file", required = false) MultipartFile multipartFile) {
-//        ShorteningResponse response = null;
-//        if (inputType.equalsIgnoreCase("url")) {
-//            response = linkService.shortenUrl(command);
-//        } else if (inputType.equalsIgnoreCase("text")) {
-//            response = linkService.shortenText(command);
-//        } else if (inputType.equalsIgnoreCase("image")) {
-//            String originalFilename = multipartFile.getOriginalFilename();
-//            String contentType = multipartFile.getContentType();
-//            long fileSize = multipartFile.getSize();
-//
-//            System.out.println("OriginalFileName: " + originalFilename);
-//            System.out.println("contentType: " + contentType);
-//            System.out.println("fileSize: " + fileSize);
-//
-//
-//        } else {
-//            throw new IllegalArgumentException("Invalid operation type: " + inputType);
-//        }
-//
-//
+//    @GetMapping("/{linkId}")
+//    public ResponseEntity<LinkResponse> findById(@PathVariable(name = "linkId") String code) {
+//        ShortURL url = linkService.findById(code);
+//        LinkResponse response = linkMapper.toResponse(url);
 //        return ResponseEntity.ok(response);
 //    }
 
 
-    @GetMapping("/{linkId}")
-    public ResponseEntity<LinkResponse> findById(@PathVariable(name = "linkId") String code) {
-
-
-        ShortURL url = linkService.findById(code);
-
-        LinkResponse response = linkMapper.toResponse(url);
-
-        return ResponseEntity.ok(response);
-    }
-
+    @ResolveSpringDoc
     @GetMapping("/{linkId}/resolve")
-    public ResponseEntity<ResolveResponse> resolve(@PathVariable(name = "linkId") String code) {
+    public ResponseEntity<ResolveResponse> resolve(
+            @Parameter(description = "Unique identifier of the shortened link", required = true, example = "abcs342")
+            @PathVariable(name = "linkId") String code) {
 
 
-        ResolveResponse resolveResponse = linkService.resolve2(code);
+        ResolveResponse resolveResponse = linkService.resolve(code);
 
         return ResponseEntity.ok(resolveResponse);
     }
 
-    @PutMapping("/{code}")
-    public ResponseEntity<LinkResponse> update(@PathVariable(name = "code") String code, @RequestBody UpdateLinkCommand command) {
+    @UpdateLinkSpringDoc
+    @PutMapping("/{linkId}")
+    public ResponseEntity<LinkResponse> update(
+            @Parameter(description = "Unique identifier of the shortened link", required = true, example = "abcs342")
+            @PathVariable(name = "linkId") String linkId,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "New link properties. If you do not want to make any changes in a property, make it 'null'.", required = true)
+            @RequestBody UpdateLinkCommand command) {
 
 
-        ShortURL url = linkService.update(command, code);
+        ShortURL url = linkService.update(command, linkId);
         LinkResponse response = linkMapper.toResponse(url);
 
         return ResponseEntity.ok(response);
     }
 
 
+    @DeleteLinkSpringDoc
     @DeleteMapping("/{linkId}")
-    public ResponseEntity<LinkResponse> deleteById(@PathVariable("linkId") String urlCode) {
+    public ResponseEntity<LinkResponse> deleteById(
+            @Parameter(description = "Unique identifier of the shortened link", required = true, example = "abcs342")
+            @PathVariable("linkId") String urlCode) {
         ShortURL deleted = linkService.deleteById(urlCode);
 
         return ResponseEntity.ok().body(linkMapper.toResponse(deleted));
     }
 
 
+    @FindAllSpringDoc
     @GetMapping
-    public ResponseEntity<List<LinkResponse>> findAllByUserId(@PositiveOrZero @RequestParam(name = "page", defaultValue = "0") int page, @PositiveOrZero @RequestParam(name = "limit", defaultValue = "10") int limit) {
+    public ResponseEntity<List<LinkResponse>> findAll(
+            @Parameter(description = "Page number (zero-based)", example = "0")
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page (at least 1)", example = "5")
+            @RequestParam(name = "limit", defaultValue = "10") int limit) {
 
 
-        List<ShortURL> allByUserId = linkService.findAllByUserId(page, limit);
+        if (page < 0 || limit < 1) {
+            page = 0;
+            limit = 10;
+        }
 
-
+        List<ShortURL> allByUserId = linkService.findAllOfAuthenticatedUser(page, limit);
         return ResponseEntity.ok().body(linkMapper.toResponse(allByUserId));
     }
 

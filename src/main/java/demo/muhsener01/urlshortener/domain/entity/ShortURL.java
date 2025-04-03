@@ -1,15 +1,17 @@
 package demo.muhsener01.urlshortener.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import demo.muhsener01.urlshortener.CacheEvictListener;
 import demo.muhsener01.urlshortener.domain.entity.expiration.ExpirationPolicy;
 import demo.muhsener01.urlshortener.domain.enums.LinkStatus;
 import demo.muhsener01.urlshortener.domain.enums.LinkType;
-import demo.muhsener01.urlshortener.exception.NotResolvableException;
 import demo.muhsener01.urlshortener.utils.JsonUtils;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.UUID;
 
@@ -18,10 +20,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
+@EntityListeners(value = {AuditingEntityListener.class, CacheEvictListener.class})
 public class ShortURL extends BaseEntity<String> {
 
 
     private UUID userId;
+    //TODO : assumed that user will not change its email.
+    private String creatorEmail;
 
     @Column(length = 1000)
     private String originalUrl;
@@ -40,21 +45,17 @@ public class ShortURL extends BaseEntity<String> {
     private ExpirationPolicy expirationPolicy;
 
 
-    public ShortURL(UUID userId, String originalUrl, ExpirationPolicy expirationPolicy, LinkType linkType) {
-        this.userId = userId;
-        this.originalUrl = originalUrl;
-        this.expirationPolicy = expirationPolicy;
-        this.linkType = linkType;
-        initialize();
-
+    public ShortURL(UUID userId, String creatorEmail, String originalUrl, ExpirationPolicy expirationPolicy, LinkType linkType) {
+        this(null, userId, creatorEmail, originalUrl, expirationPolicy, linkType);
     }
 
-    public ShortURL(String id, UUID userId, String originalUrl, ExpirationPolicy expirationPolicy, LinkType linkType) {
+    public ShortURL(String id, UUID userId, String creatorEmail, String originalUrl, ExpirationPolicy expirationPolicy, LinkType linkType) {
         this.id = id;
         this.userId = userId;
         this.originalUrl = originalUrl;
         this.expirationPolicy = expirationPolicy;
         this.linkType = linkType;
+        this.creatorEmail = creatorEmail;
         initialize();
 
     }
@@ -66,17 +67,32 @@ public class ShortURL extends BaseEntity<String> {
     }
 
 
-    public void resolve() {
-        if (!status.equals(LinkStatus.ACTIVE))
-            throw new NotResolvableException("URL is not active to resolve!");
+    public boolean resolve() {
+        if (!isActive())
+            return false;
 
-        expirationPolicy.apply(this);
+        return expirationPolicy.apply(this);
 
     }
 
     @JsonIgnore
     public boolean isRemoved() {
         return status.equals(LinkStatus.REMOVED);
+    }
+
+    @JsonIgnore
+    public boolean isUrl() {
+        return linkType.equals(LinkType.URL);
+    }
+
+    @JsonIgnore
+    public boolean isText() {
+        return linkType.equals(LinkType.TEXT);
+    }
+
+    @JsonIgnore
+    public boolean isImage() {
+        return linkType.equals(LinkType.IMAGE);
     }
 
     public void expire() {
@@ -88,7 +104,7 @@ public class ShortURL extends BaseEntity<String> {
     }
 
     @PostLoad
-    public void afterLoad() {
+    public void afterLoad() throws JsonProcessingException {
         this.expirationPolicy = JsonUtils.convertToObject(this.expirationPolicyJson, ExpirationPolicy.class);
     }
 

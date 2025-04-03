@@ -1,5 +1,6 @@
 package demo.muhsener01.urlshortener.io.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +10,9 @@ import java.time.LocalDateTime;
 @Setter
 public class AfterHoursExpirationResponse extends ExpirationResponse {
 
+
     private LocalDateTime expiresAt;
+    @Schema(example = "5")
     private int afterHours;
 
     public AfterHoursExpirationResponse() {

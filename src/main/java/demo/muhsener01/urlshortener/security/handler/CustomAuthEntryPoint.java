@@ -21,7 +21,7 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
         log.debug("Error while authenticating user with token due to: {}", authException.getMessage(),authException.getCause());
 
         GlobalExceptionHandler.ErrorResponse errorResponse = new GlobalExceptionHandler.ErrorResponse(
-                LocalDateTime.now(), 403, request.getRequestURI(), authException.getMessage()
+                LocalDateTime.now(), 401, request.getRequestURI(), authException.getMessage()
         );
 
         response.setStatus(401);

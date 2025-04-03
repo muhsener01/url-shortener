@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUserAlreadyExistsException(Exception e, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleUserAlreadyExistsException(UserAlreadyExistsException e, HttpServletRequest request) {
         logError(e);
         ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), 409, request.getRequestURI(), e.getMessage());
 
@@ -88,8 +88,8 @@ public class GlobalExceptionHandler {
 
     }
 
-    @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException exception, HttpServletRequest request) {
+    @ExceptionHandler({AuthorizationDeniedException.class, NoPermissionException.class})
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(Exception exception, HttpServletRequest request) {
 
 
         ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), 403, request.getRequestURI(), exception.getMessage());

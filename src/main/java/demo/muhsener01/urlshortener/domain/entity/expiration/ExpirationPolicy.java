@@ -22,11 +22,13 @@ public abstract class ExpirationPolicy {
 
     public abstract void initialize(ShortURL url);
 
-    public abstract void apply(ShortURL shortURL);
+
 
     public String getType() {
         return type;
     }
+
+    public abstract boolean apply(ShortURL shortURL);
 
     public abstract String displayExpiresAt();
 }

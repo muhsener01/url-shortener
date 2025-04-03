@@ -19,12 +19,8 @@ public class JsonUtils {
     }
 
 
-    public static <T> T convertToObject(String json, Class<T> clazz) {
-        try {
-            return objectMapper.readValue(json, clazz);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error while converting from json to object for class: " + clazz.getSimpleName() + " due to"  + e.getMessage() );
-        }
+    public static <T> T convertToObject(String json, Class<T> clazz) throws JsonProcessingException {
+        return objectMapper.readValue(json, clazz);
     }
 
 }

@@ -7,6 +7,7 @@ import demo.muhsener01.urlshortener.domain.entity.expiration.AfterHoursPolicy;
 import demo.muhsener01.urlshortener.domain.entity.expiration.ExpirationPolicy;
 import demo.muhsener01.urlshortener.domain.entity.expiration.SingleUsePolicy;
 import demo.muhsener01.urlshortener.domain.entity.expiration.UntilRemovedPolicy;
+import demo.muhsener01.urlshortener.domain.enums.LinkStatus;
 import demo.muhsener01.urlshortener.domain.factory.ExpirationPolicyFactory;
 import demo.muhsener01.urlshortener.io.response.*;
 import lombok.RequiredArgsConstructor;
@@ -52,9 +53,15 @@ public class LinkMapper {
     }
 
     public void merge(UpdateLinkCommand command, ShortURL shortURL) {
-        shortURL.setStatus(command.getStatus());
-        shortURL.setExpirationPolicy(ExpirationPolicyFactory.create(command.getExpirationPolicy() , command.getAfterHours()));
-        shortURL.setOriginalUrl(command.getOriginalUrl());
+        if (command.getStatus() != null)
+            shortURL.setStatus(LinkStatus.of(command.getStatus()));
+
+        if (command.getExpirationPolicy() != null)
+            shortURL.setExpirationPolicy(ExpirationPolicyFactory.create(command.getExpirationPolicy(), command.getAfterHours()));
+
+        if (command.getOriginalUrl() != null)
+            shortURL.setOriginalUrl(command.getOriginalUrl());
+
 
     }
 }

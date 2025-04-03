@@ -4,8 +4,10 @@ import demo.muhsener01.urlshortener.command.SignUpCommand;
 import demo.muhsener01.urlshortener.command.response.SignUpResponse;
 import demo.muhsener01.urlshortener.io.handler.GlobalExceptionHandler;
 import demo.muhsener01.urlshortener.service.UserService;
+import demo.muhsener01.urlshortener.springdoc.SignUpSpringDoc;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -28,21 +30,7 @@ public class AuthController {
 
 
     @PostMapping("/signup")
-    @Operation(
-            summary = "Create new User",
-            description = "Registers a new user if the username and email are unique"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User created successfully."),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "Username or email already exists",
-                    content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid input data",
-                    content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "Server error",
-                    content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)))
-    })
+    @SignUpSpringDoc
     public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpCommand command) {
         SignUpResponse responseBody = userService.createUser(command);
 

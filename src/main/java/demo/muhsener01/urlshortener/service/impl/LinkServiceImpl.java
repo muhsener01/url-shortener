@@ -7,7 +7,6 @@ import demo.muhsener01.urlshortener.command.response.ShorteningResponse;
 import demo.muhsener01.urlshortener.domain.entity.ShortURL;
 import demo.muhsener01.urlshortener.domain.entity.Text;
 import demo.muhsener01.urlshortener.domain.entity.expiration.ExpirationPolicy;
-import demo.muhsener01.urlshortener.domain.entity.expiration.SingleUsePolicy;
 import demo.muhsener01.urlshortener.domain.enums.LinkStatus;
 import demo.muhsener01.urlshortener.domain.enums.LinkType;
 import demo.muhsener01.urlshortener.domain.factory.ExpirationPolicyFactory;
@@ -69,7 +68,7 @@ public class LinkServiceImpl implements LinkService {
     @Override
     @Transactional(readOnly = true)
 //    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
-    public List<ShortURL> findAllByUserId(int page, int limit) {
+    public List<ShortURL> findAllOfAuthenticatedUser(int page, int limit) {
 
         UUID authenticatedUserId = securityOperations.getAuthenticatedUserId();
 
@@ -106,7 +105,7 @@ public class LinkServiceImpl implements LinkService {
 
         ShortURL shortURL = urlRepository.findById(code).orElseThrow(() -> new URLNotFoundException("id", code));
 
-        if (!userPrincipal.getId().equals(shortURL.getUserId()) && userPrincipal.isAdmin()) {
+        if (!userPrincipal.getId().equals(shortURL.getUserId()) && !userPrincipal.isAdmin()) {
             throw new NoPermissionException("No permission to update link with code: " + code);
         }
 
@@ -121,14 +120,14 @@ public class LinkServiceImpl implements LinkService {
     @Override
     @Transactional
     public ShorteningResponse shortenUrl(ShortenCommand command) {
-        UUID userId = securityOperations.getAuthenticatedUserId();
+        UserPrincipal userId = securityOperations.getAuthenticatedPrincipal();
 
         String longUrl = command.getInput().trim();
         longUrl = urlValidator.validateAndFormatUrl(longUrl);
 
         ExpirationPolicy expirationPolicy = ExpirationPolicyFactory.create(command.getExpirationPolicy(), command.getAfterHours());
 
-        ShortURL shortURL = new ShortURL(userId, longUrl, expirationPolicy, LinkType.URL);
+        ShortURL shortURL = new ShortURL(userId.getId(), userId.getEmail(), longUrl, expirationPolicy, LinkType.URL);
         ShortURL savedUrl = urlRepository.generateUniqueKeyAndSave(shortURL);
 
 
@@ -142,14 +141,14 @@ public class LinkServiceImpl implements LinkService {
     @Override
     @Transactional
     public ShorteningResponse shortenText(ShortenCommand command) {
-        UUID userId = securityOperations.getAuthenticatedUserId();
+        UserPrincipal userPrincipal = securityOperations.getAuthenticatedPrincipal();
         String textInput = command.getInput();
         String uniqueKey = hashingEngine.generateUniqueKey(textInput);
         ExpirationPolicy expirationPolicy = ExpirationPolicyFactory.create(command.getExpirationPolicy(), command.getAfterHours());
 
 //        String originalUrl = applicationProperties.getBaseDomain() + "/text" + "/" + uniqueKey;
 //        String originalUrl = command.getBaseDomain() + "/" + uniqueKey;
-        ShortURL shortURL = new ShortURL(uniqueKey, userId, "", expirationPolicy, LinkType.TEXT);
+        ShortURL shortURL = new ShortURL(uniqueKey, userPrincipal.getId(), userPrincipal.getEmail(), "", expirationPolicy, LinkType.TEXT);
 
 
         Text text = new Text(uniqueKey, textInput);
@@ -162,30 +161,30 @@ public class LinkServiceImpl implements LinkService {
     }
 
     @Override
+    @Transactional
     public ShorteningResponse shortenImage(ShortenCommand command, MultipartFile multipartFile) {
-        UUID userId = securityOperations.getAuthenticatedUserId();
+        UserPrincipal userPrincipal = securityOperations.getAuthenticatedPrincipal();
 
         String uniqueKey = hashingEngine.generateUniqueKey(multipartFile.getOriginalFilename());
 
-        String publicUrl = minioService.putObject(multipartFile);
+        String publicUrl = minioService.putObject(uniqueKey, multipartFile);
 
-        log.info("New image with code: {} has been shortened by User: {}", uniqueKey, userId);
 
         ExpirationPolicy expirationPolicy = ExpirationPolicyFactory.create(command.getExpirationPolicy(), command.getAfterHours());
 
-        ShortURL shortURL = new ShortURL(uniqueKey, userId, publicUrl, expirationPolicy, LinkType.IMAGE);
+        ShortURL shortURL = new ShortURL(uniqueKey, userPrincipal.getId(), userPrincipal.getEmail(), publicUrl, expirationPolicy, LinkType.IMAGE);
 
-        ShortURL save = urlRepository.save(shortURL);
+        urlRepository.save(shortURL);
+
+        log.info("New image with code: {} has been shortened by User: {}", uniqueKey, userPrincipal.getId());
 
         return new ShorteningResponse(command.getBaseDomain() + "/" + uniqueKey);
 
-
     }
 
+
     @Transactional(noRollbackFor = UrlExpiredException.class)
-    public String resolve(String shortenCode) {
-
-
+    public ResolveResponse resolve(String shortenCode) {
         String cacheKey = "urls:" + shortenCode;
         ShortURL url = urlCacheService.get(cacheKey);
 
@@ -194,59 +193,23 @@ public class LinkServiceImpl implements LinkService {
             urlCacheService.set(cacheKey, url, 60);
         }
 
-        try {
-            url.resolve();
-            if (url.getExpirationPolicy() instanceof SingleUsePolicy singleUsePolicy) {
-                urlCacheService.delete(cacheKey);
-            }
+        boolean resolved = url.resolve();
 
 
-        } catch (UrlExpiredException e) {
-            urlRepository.update(url);
-            urlCacheService.delete(cacheKey);
-            throw e;
-        }
-
-        return url.getOriginalUrl();
-    }
-
-    @Transactional(noRollbackFor = UrlExpiredException.class)
-    public ResolveResponse resolve2(String shortenCode) {
-
-
-        String cacheKey = "urls:" + shortenCode;
-        ShortURL url = urlCacheService.get(cacheKey);
-
-        if (url == null) {
-            url = urlRepository.findById(shortenCode).orElseThrow(() -> new URLNotFoundException("id", shortenCode));
-            urlCacheService.set(cacheKey, url, 60);
-        }
-
-        try {
-            LinkStatus statusBeforeResolving = url.getStatus();
-            url.resolve();
-            if (url.getExpirationPolicy() instanceof SingleUsePolicy singleUsePolicy) {
-                urlCacheService.delete(cacheKey);
-            }
-
-            if (url.getLinkType().equals(LinkType.URL) || url.getLinkType().equals(LinkType.IMAGE)) {
-                return new ResolveResponse(url.getLinkType().name(), url.getOriginalUrl(), "", statusBeforeResolving.name());
+        if (resolved) {
+            if (url.isUrl() || url.isImage()) {
+                return new ResolveResponse(url.getLinkType().name(), url.getOriginalUrl(), LinkStatus.ACTIVE.name(), url.getCreatorEmail());
             } else {
                 ShortURL finalUrl = url;
                 Text text = textJpaRepository.findById(url.getId()).orElseThrow(
                         () -> new TextNotFoundException("id", finalUrl.getId())
                 );
 
-                return new ResolveResponse(LinkType.TEXT.name(), "", text.getText(), statusBeforeResolving.name());
+                return new ResolveResponse(url.getLinkType().name(), text.getText(), LinkStatus.ACTIVE.name(), url.getCreatorEmail());
             }
-
-
-        } catch (UrlExpiredException e) {
-            urlRepository.update(url);
-            urlCacheService.delete(cacheKey);
-            throw e;
+        } else {
+            return new ResolveResponse(url.getLinkType().name(), url.getOriginalUrl(), url.getStatus().name(), url.getCreatorEmail());
         }
 
-//        return url.getOriginalUrl();
     }
 }
