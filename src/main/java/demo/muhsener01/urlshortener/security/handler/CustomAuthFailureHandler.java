@@ -5,6 +5,7 @@ import demo.muhsener01.urlshortener.utils.JsonUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
@@ -20,8 +21,15 @@ public class CustomAuthFailureHandler implements AuthenticationFailureHandler {
                 new GlobalExceptionHandler.ErrorResponse(LocalDateTime.now(), 401, request.getRequestURI(), exception.getMessage());
 
 
+        if (exception instanceof InternalAuthenticationServiceException internalAuthenticationServiceException) {
+            errorResponse.setStatus(500);
+            errorResponse.setMessage("Internal server error!");
+            response.setStatus(500);
+        } else {
+            response.setStatus(401);
+        }
+
         String body = JsonUtils.convertToJson(errorResponse);
-        response.setStatus(401);
         response.setContentType("application/json");
         response.getWriter().append(body);
     }

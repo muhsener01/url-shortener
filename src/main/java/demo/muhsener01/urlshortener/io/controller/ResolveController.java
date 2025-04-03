@@ -1,8 +1,6 @@
 package demo.muhsener01.urlshortener.io.controller;
 
-import demo.muhsener01.urlshortener.io.response.TextResponse;
 import demo.muhsener01.urlshortener.service.LinkService;
-import demo.muhsener01.urlshortener.service.TextService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,7 +19,7 @@ import java.net.URI;
 public class ResolveController {
 
     private final LinkService linkService;
-    private final TextService textService;
+
 
     @GetMapping("/{shortenCode}")
     public ResponseEntity<Void> resolve(@PathVariable(name = "shortenCode") String code, HttpServletResponse response) throws IOException {
@@ -33,13 +31,6 @@ public class ResolveController {
 
         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(url)).build();
 
-    }
-
-    @GetMapping("/text/{textCode}")
-    private ResponseEntity<TextResponse> getText(@PathVariable("textCode") String textCode) {
-        String text = textService.getText(textCode);
-
-        return ResponseEntity.ok(new TextResponse(textCode, text));
     }
 
 

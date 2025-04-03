@@ -4,15 +4,16 @@ import demo.muhsener01.urlshortener.command.ShortenCommand;
 import demo.muhsener01.urlshortener.command.UpdateLinkCommand;
 import demo.muhsener01.urlshortener.command.response.ShorteningResponse;
 import demo.muhsener01.urlshortener.domain.entity.ShortURL;
+import demo.muhsener01.urlshortener.io.response.ResolveResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface LinkService {
 
     ShortURL findById(String code);
 
-    List<ShortURL> findAllByUserId(UUID userId, int page, int limit);
+    List<ShortURL> findAllByUserId(int page, int limit);
 
     ShortURL deleteById(String urlCode);
 
@@ -22,6 +23,10 @@ public interface LinkService {
 
     ShorteningResponse shortenText(ShortenCommand command);
 
+    ShorteningResponse shortenImage(ShortenCommand command , MultipartFile multipartFile);
+
 
     String resolve(String shortenCode);
+
+    ResolveResponse resolve2(String shortenCode);
 }

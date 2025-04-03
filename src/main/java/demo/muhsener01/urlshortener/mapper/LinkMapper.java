@@ -22,9 +22,12 @@ public class LinkMapper {
 
     public LinkResponse toResponse(ShortURL url) {
         return new LinkResponse(
+                url.getId(),
+                url.getLinkType().name(),
                 applicationProperties.getBaseDomain() + "/" + url.getId(),
                 url.getOriginalUrl(),
                 url.getStatus().name(),
+                url.getCreatedAt(),
                 expirationResponse(url.getExpirationPolicy())
         );
 

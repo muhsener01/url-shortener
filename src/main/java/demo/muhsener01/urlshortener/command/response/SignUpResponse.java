@@ -12,7 +12,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SignUpResponse extends RepresentationModel<SignUpResponse> {
+public class SignUpResponse  {
 
     private UUID id;
     private String email;

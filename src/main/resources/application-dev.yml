@@ -1,6 +1,9 @@
 spring:
-
-
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
   datasource:
     url: jdbc:postgresql://localhost:5432/shortener
     username: postgres
@@ -16,7 +19,11 @@ spring:
       hibernate:
         format_sql: true
 
-
+minio:
+  url: http://localhost:9000
+  user: minioadmin
+  password: minioadmin
+  bucket-name: shortener
 
 
 security:
@@ -26,6 +33,8 @@ security:
   token-prefix: "Bearer "
 
 
+
+
 logging:
   level:
     demo.muhsener01: TRACE
@@ -33,4 +42,4 @@ logging:
 
 application:
   properties:
-    base-domain: http://localhost:8080
+    base-domain: http://localhost:5173

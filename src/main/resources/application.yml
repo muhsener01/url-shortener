@@ -3,5 +3,4 @@ spring:
     name: url-shortener
   profiles:
     active: dev
-  config:
-    import: classpath:application-dev.yml
+

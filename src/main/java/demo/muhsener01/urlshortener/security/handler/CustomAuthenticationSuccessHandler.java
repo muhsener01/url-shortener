@@ -28,7 +28,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
         UserPrincipal userPrincipal = ((UserPrincipal) authentication.getPrincipal());
-        log.info("User with username: '{}' authenticated successfully", userPrincipal.getUsername());
+        log.info("User with id: '{}' username: '{}' logged in successfully", userPrincipal.getId(), userPrincipal.getUsername());
 
         String token = JwtUtils.generateToken(userPrincipal.getId(), userPrincipal.getEmail(), userPrincipal.getUsername(), userPrincipal.getRoles());
 

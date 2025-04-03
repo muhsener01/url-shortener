@@ -10,6 +10,7 @@ import demo.muhsener01.urlshortener.exception.UserAlreadyExistsException;
 import demo.muhsener01.urlshortener.repository.RoleRepository;
 import demo.muhsener01.urlshortener.repository.UserRepository;
 import demo.muhsener01.urlshortener.security.UserPrincipal;
+import demo.muhsener01.urlshortener.service.CacheService;
 import demo.muhsener01.urlshortener.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final CacheService<String, Role> roleCacheService;
 
     @Override
     @Transactional
@@ -57,6 +59,7 @@ public class UserServiceImpl implements UserService {
     private Role fetchUserRole() {
         return roleRepository.findById(RoleName.USER.name()).orElseThrow(() ->
                 new RoleNotFoundException("id", RoleName.USER.name()));
+
     }
 
     @Override

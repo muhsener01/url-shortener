@@ -3,6 +3,7 @@ package demo.muhsener01.urlshortener.bootstrap;
 import demo.muhsener01.urlshortener.domain.entity.Role;
 import demo.muhsener01.urlshortener.domain.enums.RoleName;
 import demo.muhsener01.urlshortener.repository.RoleRepository;
+import demo.muhsener01.urlshortener.service.CacheService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -17,21 +18,22 @@ import java.util.Optional;
 public class RoleInitializer {
 
     private final RoleRepository roleRepository;
+    private final CacheService<String, Role> roleCacheService;
 
     @EventListener
     public void onApplicationReady(ApplicationReadyEvent event) {
         Optional<Role> userRole = roleRepository.findById(RoleName.USER.name());
         Optional<Role> adminRole = roleRepository.findById(RoleName.ADMIN.name());
 
-        if (userRole.isEmpty()){
+        if (userRole.isEmpty()) {
             roleRepository.save(new Role(RoleName.USER));
-            log.trace("User Role persisted into database.");
+            log.info("User Role persisted into database.");
 
         }
 
         if (adminRole.isEmpty()) {
             roleRepository.save(new Role(RoleName.ADMIN));
-            log.trace("Admin Role persisted into database.");
+            log.info("Admin Role persisted into database.");
         }
 
 

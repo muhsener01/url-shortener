@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,17 +39,14 @@ public class AuthController {
                     description = "Username or email already exists",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input data",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Server error",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)))
     })
     public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpCommand command) {
         SignUpResponse responseBody = userService.createUser(command);
 
-        log.info("User with username '{}' registered successfully", responseBody.getUsername());
-
-        Link self = Link.of("/api/v1/auth/signup").withType("POST");
-        Link loginLink = Link.of("/api/v1/auth/login", "login").withType("POST");
-
-        responseBody.add(self, loginLink);
+        log.info("New user registered: id: {} email: {} username: {}", responseBody.getId(), responseBody.getEmail(), responseBody.getUsername());
 
         return ResponseEntity.ok(responseBody);
     }

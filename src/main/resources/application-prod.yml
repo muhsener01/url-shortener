@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    hikari:
+      connection-timeout: 3000
+    url: jdbc:postgresql://localhost:5432/shortener
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database: postgresql
+    hibernate:
+      ddl-auto: create
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+
+
+
+security:
+  login-url: /api/v1/auth/login
+  secret-key: ${TOKEN_SECRET_KEY:12934812903askjdaksdjasd09as8dasdlaksjd}
+  token-expiration-time: ${TOKEN_EXPIRATION_TIME:86400000}
+  token-prefix: ${TOKEN_PREFIX:Bearer }
+
+
+logging:
+  level:
+    demo.muhsener01: INFO
+    org.springframework.security: INFO
+
+application:
+  properties:
+    base-domain: ${BASE_DOMAIN:http://localhost:8080}

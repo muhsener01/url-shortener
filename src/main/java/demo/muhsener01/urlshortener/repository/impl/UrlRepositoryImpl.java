@@ -47,7 +47,7 @@ public class UrlRepositoryImpl implements UrlRepository {
             entityManager.flush();
             return shortURL;
         } catch (ConstraintViolationException e) {
-            log.debug("Duplicated url code is foound: {} and retrying again...", uniqueKey);
+            log.info("Duplicated url code is found: {} and retrying again...", uniqueKey);
             throw e;
         }
     }
