@@ -53,15 +53,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
-    @ExceptionHandler(NotResolvableException.class)
-    public ResponseEntity<ErrorResponse> handleNotResolvableException(NotResolvableException exception, HttpServletRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), 400, request.getRequestURI(), exception.getMessage());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
-
-
-    @ExceptionHandler({TextNotFoundException.class, URLNotFoundException.class, RoleNotFoundException.class})
+    @ExceptionHandler({LinkNotFoundException.class, RoleNotFoundException.class, UserNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleTextNotFoundException(NotFoundException exception, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), 404, request.getRequestURI(), exception.getMessage());
 

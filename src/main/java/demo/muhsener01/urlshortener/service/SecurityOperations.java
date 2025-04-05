@@ -1,5 +1,6 @@
 package demo.muhsener01.urlshortener.service;
 
+import demo.muhsener01.urlshortener.domain.entity.Link;
 import demo.muhsener01.urlshortener.exception.AuthenticationRequiredException;
 import demo.muhsener01.urlshortener.security.UserPrincipal;
 
@@ -16,4 +17,6 @@ public interface SecurityOperations {
     UUID getAuthenticatedUserId() throws AuthenticationRequiredException;
 
     UserPrincipal getAuthenticatedPrincipal();
+
+    boolean isUrlOwnerOrAdmin(Link link) throws AuthenticationRequiredException;
 }

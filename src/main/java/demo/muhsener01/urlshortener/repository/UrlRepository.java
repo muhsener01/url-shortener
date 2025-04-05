@@ -1,20 +1,26 @@
 package demo.muhsener01.urlshortener.repository;
 
-import demo.muhsener01.urlshortener.domain.entity.ShortURL;
+import demo.muhsener01.urlshortener.domain.entity.Link;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface UrlRepository {
 
-    ShortURL save(ShortURL url);
+    Link save(Link url);
 
-    ShortURL generateUniqueKeyAndSave(ShortURL shortURL);
+    Link generateUniqueKeyAndSave(Link link);
 
-    Optional<ShortURL> findById(String shortenCode);
+    Optional<Link> findById(String shortenCode);
 
-    ShortURL update(ShortURL url);
+    Link update(Link url);
 
     boolean existsById(String id);
+
+    Optional<Link> findByIdIfNotRemoved(String id);
+
+    List<Link> findAllByUserIdIfNotRemoved(UUID authenticatedUserId, int page, int limit);
 }
 
 

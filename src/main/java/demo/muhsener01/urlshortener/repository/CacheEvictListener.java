@@ -1,6 +1,6 @@
-package demo.muhsener01.urlshortener;
+package demo.muhsener01.urlshortener.repository;
 
-import demo.muhsener01.urlshortener.domain.entity.ShortURL;
+import demo.muhsener01.urlshortener.domain.entity.Link;
 import demo.muhsener01.urlshortener.service.CacheService;
 import jakarta.persistence.PreUpdate;
 import lombok.RequiredArgsConstructor;
@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CacheEvictListener {
 
-    private final CacheService<String, ShortURL> cacheService;
+    private final CacheService<String, Link> cacheService;
 
 
     @PreUpdate
-    public void onPreUpdate(ShortURL shortURL) {
-        String cacheKey = "urls:" + shortURL.getId();
+    public void onPreUpdate(Link link) {
+        String cacheKey = "urls:" + link.getId();
         log.debug("Cache evicted: {}", cacheKey);
         cacheService.delete(cacheKey);
     }

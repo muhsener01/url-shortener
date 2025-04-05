@@ -1,8 +1,8 @@
 package demo.muhsener01.urlshortener.mapper;
 
-import demo.muhsener01.urlshortener.ApplicationProperties;
+import demo.muhsener01.urlshortener.config.ApplicationProperties;
 import demo.muhsener01.urlshortener.command.UpdateLinkCommand;
-import demo.muhsener01.urlshortener.domain.entity.ShortURL;
+import demo.muhsener01.urlshortener.domain.entity.Link;
 import demo.muhsener01.urlshortener.domain.entity.expiration.AfterHoursPolicy;
 import demo.muhsener01.urlshortener.domain.entity.expiration.ExpirationPolicy;
 import demo.muhsener01.urlshortener.domain.entity.expiration.SingleUsePolicy;
@@ -21,12 +21,12 @@ public class LinkMapper {
 
     private final ApplicationProperties applicationProperties;
 
-    public LinkResponse toResponse(ShortURL url) {
+    public LinkResponse toResponse(Link url) {
         return new LinkResponse(
                 url.getId(),
                 url.getLinkType().name(),
                 applicationProperties.getBaseDomain() + "/" + url.getId(),
-                url.getOriginalUrl(),
+                url.getContent(),
                 url.getStatus().name(),
                 url.getCreatedAt(),
                 expirationResponse(url.getExpirationPolicy())
@@ -34,7 +34,7 @@ public class LinkMapper {
 
     }
 
-    public List<LinkResponse> toResponse(List<ShortURL> urls) {
+    public List<LinkResponse> toResponse(List<Link> urls) {
         return urls.stream()
                 .map(this::toResponse)
                 .toList();
@@ -52,15 +52,15 @@ public class LinkMapper {
         };
     }
 
-    public void merge(UpdateLinkCommand command, ShortURL shortURL) {
+    public void merge(UpdateLinkCommand command, Link link) {
         if (command.getStatus() != null)
-            shortURL.setStatus(LinkStatus.of(command.getStatus()));
+            link.setStatus(LinkStatus.of(command.getStatus()));
 
         if (command.getExpirationPolicy() != null)
-            shortURL.setExpirationPolicy(ExpirationPolicyFactory.create(command.getExpirationPolicy(), command.getAfterHours()));
+            link.setExpirationPolicy(ExpirationPolicyFactory.create(command.getExpirationPolicy(), command.getAfterHours()));
 
         if (command.getOriginalUrl() != null)
-            shortURL.setOriginalUrl(command.getOriginalUrl());
+            link.setContent(command.getOriginalUrl());
 
 
     }

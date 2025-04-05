@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import demo.muhsener01.urlshortener.command.ShortenCommand;
 import demo.muhsener01.urlshortener.command.UpdateLinkCommand;
 import demo.muhsener01.urlshortener.command.response.ShorteningResponse;
-import demo.muhsener01.urlshortener.domain.entity.ShortURL;
+import demo.muhsener01.urlshortener.domain.entity.Link;
 import demo.muhsener01.urlshortener.io.response.LinkResponse;
 import demo.muhsener01.urlshortener.io.response.ResolveResponse;
 import demo.muhsener01.urlshortener.mapper.LinkMapper;
@@ -51,9 +51,9 @@ public class LinkController {
 
         ShorteningResponse response = null;
         if (inputType.equalsIgnoreCase("url"))
-            response = linkService.shortenUrl(command);
+            response = linkService.shorten("url",command);
         else if (inputType.equalsIgnoreCase("text"))
-            response = linkService.shortenText(command);
+            response = linkService.shorten("text",command);
         else if (inputType.equalsIgnoreCase("image")) {
             if (multipartFile == null)
                 throw new IllegalArgumentException("Multipart file cannot be null when type=image");
@@ -67,12 +67,7 @@ public class LinkController {
     }
 
 
-//    @GetMapping("/{linkId}")
-//    public ResponseEntity<LinkResponse> findById(@PathVariable(name = "linkId") String code) {
-//        ShortURL url = linkService.findById(code);
-//        LinkResponse response = linkMapper.toResponse(url);
-//        return ResponseEntity.ok(response);
-//    }
+
 
 
     @ResolveSpringDoc
@@ -96,7 +91,7 @@ public class LinkController {
             @RequestBody UpdateLinkCommand command) {
 
 
-        ShortURL url = linkService.update(command, linkId);
+        Link url = linkService.update(command, linkId);
         LinkResponse response = linkMapper.toResponse(url);
 
         return ResponseEntity.ok(response);
@@ -108,7 +103,7 @@ public class LinkController {
     public ResponseEntity<LinkResponse> deleteById(
             @Parameter(description = "Unique identifier of the shortened link", required = true, example = "abcs342")
             @PathVariable("linkId") String urlCode) {
-        ShortURL deleted = linkService.deleteById(urlCode);
+        Link deleted = linkService.deleteById(urlCode);
 
         return ResponseEntity.ok().body(linkMapper.toResponse(deleted));
     }
@@ -128,7 +123,7 @@ public class LinkController {
             limit = 10;
         }
 
-        List<ShortURL> allByUserId = linkService.findAllOfAuthenticatedUser(page, limit);
+        List<Link> allByUserId = linkService.findAllOfAuthenticatedUser(page, limit);
         return ResponseEntity.ok().body(linkMapper.toResponse(allByUserId));
     }
 

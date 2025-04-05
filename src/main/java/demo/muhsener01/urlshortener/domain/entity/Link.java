@@ -2,10 +2,12 @@ package demo.muhsener01.urlshortener.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import demo.muhsener01.urlshortener.CacheEvictListener;
 import demo.muhsener01.urlshortener.domain.entity.expiration.ExpirationPolicy;
 import demo.muhsener01.urlshortener.domain.enums.LinkStatus;
 import demo.muhsener01.urlshortener.domain.enums.LinkType;
+import demo.muhsener01.urlshortener.event.UrlStatusChangedEvent;
+import demo.muhsener01.urlshortener.exception.InvalidDomainException;
+import demo.muhsener01.urlshortener.repository.CacheEvictListener;
 import demo.muhsener01.urlshortener.utils.JsonUtils;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -21,15 +23,15 @@ import java.util.UUID;
 @Getter
 @Setter
 @EntityListeners(value = {AuditingEntityListener.class, CacheEvictListener.class})
-public class ShortURL extends BaseEntity<String> {
+public class Link extends BaseEntity<String> {
 
 
     private UUID userId;
-    //TODO : assumed that user will not change its email.
+
     private String creatorEmail;
 
-    @Column(length = 1000)
-    private String originalUrl;
+    @Column(length = 500)
+    private String content;
 
     @Enumerated(EnumType.STRING)
     private LinkStatus status;
@@ -40,44 +42,75 @@ public class ShortURL extends BaseEntity<String> {
     @Column(name = "expiration_policy", columnDefinition = "TEXT")
     private String expirationPolicyJson;
 
+    private String shortUrl;
 
     @Transient
     private ExpirationPolicy expirationPolicy;
 
 
-    public ShortURL(UUID userId, String creatorEmail, String originalUrl, ExpirationPolicy expirationPolicy, LinkType linkType) {
-        this(null, userId, creatorEmail, originalUrl, expirationPolicy, linkType);
+    public Link(UUID userId, String creatorEmail, String content, ExpirationPolicy expirationPolicy, LinkType linkType) {
+        this(null, userId, creatorEmail, content, expirationPolicy, linkType);
     }
 
-    public ShortURL(String id, UUID userId, String creatorEmail, String originalUrl, ExpirationPolicy expirationPolicy, LinkType linkType) {
+
+    public Link(String id, UUID userId, String creatorEmail, String content, ExpirationPolicy expirationPolicy, LinkType linkType) {
         this.id = id;
         this.userId = userId;
-        this.originalUrl = originalUrl;
+        this.content = content;
         this.expirationPolicy = expirationPolicy;
         this.linkType = linkType;
         this.creatorEmail = creatorEmail;
+
+
         initialize();
+
 
     }
 
     private void initialize() {
+        validate();
         this.status = LinkStatus.ACTIVE;
         expirationPolicy.initialize(this);
         expirationPolicyJson = JsonUtils.convertToJson(expirationPolicy);
     }
 
+    private void validate() {
+        if (userId == null || creatorEmail == null || creatorEmail.isBlank())
+            throw new InvalidDomainException("Link must have a userId and non-blank creator email.");
+
+        if (expirationPolicy == null)
+            throw new InvalidDomainException("Link must have a valid expiration policy.");
+
+        if (content == null || content.isBlank() || content.length() > 500)
+            throw new InvalidDomainException("Link content must be non-blank and at most 500 characters.");
+
+        if (linkType == null)
+            throw new InvalidDomainException("Link must have a type such as IMAGE, TEXT or URL");
+
+
+    }
+
 
     public boolean resolve() {
-        if (!isActive())
-            return false;
+        if (!isActive()) return false;
 
-        return expirationPolicy.apply(this);
+        boolean resolvable = expirationPolicy.apply(this);
+
+        if (isExpired())
+            addEvent(new UrlStatusChangedEvent(this));
+
+        return resolvable;
 
     }
 
     @JsonIgnore
     public boolean isRemoved() {
         return status.equals(LinkStatus.REMOVED);
+    }
+
+    @JsonIgnore
+    public boolean isExpired() {
+        return status.equals(LinkStatus.EXPIRED);
     }
 
     @JsonIgnore
@@ -125,4 +158,14 @@ public class ShortURL extends BaseEntity<String> {
         expirationPolicy.initialize(this);
         this.expirationPolicyJson = JsonUtils.convertToJson(expirationPolicy);
     }
+
+    public void setId(String id) {
+        if (this.id == null)
+            this.id = id;
+        else
+            throw new RuntimeException("ID of ShortURL cannot be changed!");
+
+
+    }
+
 }

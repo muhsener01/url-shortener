@@ -1,7 +1,7 @@
 package demo.muhsener01.urlshortener.domain.entity.expiration;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import demo.muhsener01.urlshortener.domain.entity.ShortURL;
+import demo.muhsener01.urlshortener.domain.entity.Link;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,19 +13,19 @@ public class SingleUsePolicy extends ExpirationPolicy {
     private boolean used;
 
     @Override
-    public void initialize(ShortURL url) {
+    public void initialize(Link url) {
         used = false;
     }
 
 
     @Override
-    public boolean apply(ShortURL shortURL) {
+    public boolean apply(Link link) {
         if (used) {
             return false;
         } else {
             used = true;
-            shortURL.expire();
-            shortURL.refreshExpirationPolicy();
+            link.expire();
+            link.refreshExpirationPolicy();
             return true;
         }
     }

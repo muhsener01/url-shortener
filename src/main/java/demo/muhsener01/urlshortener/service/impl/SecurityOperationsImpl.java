@@ -1,5 +1,6 @@
 package demo.muhsener01.urlshortener.service.impl;
 
+import demo.muhsener01.urlshortener.domain.entity.Link;
 import demo.muhsener01.urlshortener.exception.AuthenticationRequiredException;
 import demo.muhsener01.urlshortener.security.UserPrincipal;
 import demo.muhsener01.urlshortener.service.SecurityOperations;
@@ -20,12 +21,21 @@ public class SecurityOperationsImpl implements SecurityOperations {
     }
 
     @Override
-    public UserPrincipal getAuthenticatedPrincipal() {
+    public UserPrincipal getAuthenticatedPrincipal() throws AuthenticationRequiredException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
             throw new AuthenticationRequiredException("Authentication is required!");
         }
 
         return ((UserPrincipal) authentication.getPrincipal());
+    }
+
+    @Override
+    public boolean isUrlOwnerOrAdmin(Link link) throws AuthenticationRequiredException {
+        UserPrincipal userPrincipal = getAuthenticatedPrincipal();
+
+        return (link.getUserId().equals(userPrincipal.getId()) || userPrincipal.isAdmin());
+
+
     }
 }

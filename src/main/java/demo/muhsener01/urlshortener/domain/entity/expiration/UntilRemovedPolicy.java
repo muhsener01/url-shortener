@@ -1,20 +1,20 @@
 package demo.muhsener01.urlshortener.domain.entity.expiration;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import demo.muhsener01.urlshortener.domain.entity.ShortURL;
+import demo.muhsener01.urlshortener.domain.entity.Link;
 
 @JsonTypeName("until-removed")
 public class UntilRemovedPolicy extends ExpirationPolicy {
 
     @Override
-    public void initialize(ShortURL url) {
+    public void initialize(Link url) {
         this.type = "until-removed";
     }
 
 
     @Override
-    public boolean apply(ShortURL shortURL) {
-        return !shortURL.isRemoved();
+    public boolean apply(Link link) {
+        return !link.isRemoved();
     }
 
     @Override

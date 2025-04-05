@@ -2,5 +2,5 @@ spring:
   application:
     name: url-shortener
   profiles:
-    active: prod
+    active: dev
 

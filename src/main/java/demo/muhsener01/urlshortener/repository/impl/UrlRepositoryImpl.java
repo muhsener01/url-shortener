@@ -1,6 +1,6 @@
 package demo.muhsener01.urlshortener.repository.impl;
 
-import demo.muhsener01.urlshortener.domain.entity.ShortURL;
+import demo.muhsener01.urlshortener.domain.entity.Link;
 import demo.muhsener01.urlshortener.repository.UrlRepository;
 import demo.muhsener01.urlshortener.repository.jpa.UrlJpaRepository;
 import jakarta.persistence.EntityManager;
@@ -8,12 +8,15 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,7 +30,7 @@ public class UrlRepositoryImpl implements UrlRepository {
     private EntityManager entityManager;
 
     @Transactional
-    public ShortURL save(ShortURL url) {
+    public Link save(Link url) {
         entityManager.persist(url);
         entityManager.flush(); // To trigger db exceptions
 
@@ -37,15 +40,15 @@ public class UrlRepositoryImpl implements UrlRepository {
     @Override
     @Transactional
     @Retryable(retryFor = ConstraintViolationException.class)
-    public ShortURL generateUniqueKeyAndSave(ShortURL shortURL) {
-        String uniqueKey = hash(shortURL.getOriginalUrl() + UUID.randomUUID()).substring(0, 7);
+    public Link generateUniqueKeyAndSave(Link link) {
+        String uniqueKey = hash(link.getContent() + UUID.randomUUID()).substring(0, 7);
 //        String uniqueKey = "forTest";
-        shortURL.setId(uniqueKey);
+        link.setId(uniqueKey);
 
         try {
-            entityManager.persist(shortURL);
+            entityManager.persist(link);
             entityManager.flush();
-            return shortURL;
+            return link;
         } catch (ConstraintViolationException e) {
             log.info("Duplicated url code is found: {} and retrying again...", uniqueKey);
             throw e;
@@ -54,13 +57,13 @@ public class UrlRepositoryImpl implements UrlRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ShortURL> findById(String id) {
-        return Optional.ofNullable(entityManager.find(ShortURL.class, id));
+    public Optional<Link> findById(String id) {
+        return Optional.ofNullable(entityManager.find(Link.class, id));
     }
 
     @Override
     @Transactional
-    public ShortURL update(ShortURL url) {
+    public Link update(Link url) {
         entityManager.merge(url);
         return url;
     }
@@ -68,6 +71,18 @@ public class UrlRepositoryImpl implements UrlRepository {
     @Override
     public boolean existsById(String id) {
         return urlJpaRepository.existsById(id);
+    }
+
+    @Override
+    public Optional<Link> findByIdIfNotRemoved(String id) {
+        return urlJpaRepository.findByIdIfNotRemoved(id);
+    }
+
+    @Override
+    public List<Link> findAllByUserIdIfNotRemoved(UUID authenticatedUserId, int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit);
+
+        return urlJpaRepository.findAllByUserIdIfNotRemoved(authenticatedUserId, pageable);
     }
 
     private String hash(String input) {

@@ -1,4 +1,4 @@
-package demo.muhsener01.urlshortener;
+package demo.muhsener01.urlshortener.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

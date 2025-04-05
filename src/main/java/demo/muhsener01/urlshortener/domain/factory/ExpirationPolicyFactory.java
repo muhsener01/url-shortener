@@ -9,6 +9,8 @@ import demo.muhsener01.urlshortener.exception.InvalidDomainException;
 public class ExpirationPolicyFactory {
 
     public static ExpirationPolicy create(String type, int afterHours) {
+        if (type == null)
+            return null;
         String lowerCase = type.toLowerCase();
         return switch (lowerCase) {
             case "single-use" -> new SingleUsePolicy();

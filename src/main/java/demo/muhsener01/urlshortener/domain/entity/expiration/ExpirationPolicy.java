@@ -3,7 +3,7 @@ package demo.muhsener01.urlshortener.domain.entity.expiration;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import demo.muhsener01.urlshortener.domain.entity.ShortURL;
+import demo.muhsener01.urlshortener.domain.entity.Link;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -20,7 +20,7 @@ public abstract class ExpirationPolicy {
     @JsonIgnore
     protected String type;
 
-    public abstract void initialize(ShortURL url);
+    public abstract void initialize(Link url);
 
 
 
@@ -28,7 +28,7 @@ public abstract class ExpirationPolicy {
         return type;
     }
 
-    public abstract boolean apply(ShortURL shortURL);
+    public abstract boolean apply(Link link);
 
     public abstract String displayExpiresAt();
 }

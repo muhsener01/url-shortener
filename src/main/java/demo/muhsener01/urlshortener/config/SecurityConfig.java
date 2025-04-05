@@ -1,9 +1,10 @@
-package demo.muhsener01.urlshortener.security;
+package demo.muhsener01.urlshortener.config;
 
 import demo.muhsener01.urlshortener.domain.entity.Role;
 import demo.muhsener01.urlshortener.repository.RoleRepository;
 import demo.muhsener01.urlshortener.repository.impl.UserRepositoryImpl;
 import demo.muhsener01.urlshortener.repository.jpa.UserJpaRepository;
+import demo.muhsener01.urlshortener.security.SecurityConstants;
 import demo.muhsener01.urlshortener.security.filter.JwtAuthenticationFilter;
 import demo.muhsener01.urlshortener.security.handler.CustomAuthEntryPoint;
 import demo.muhsener01.urlshortener.security.handler.CustomAuthFailureHandler;

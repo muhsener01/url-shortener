@@ -1,4 +1,4 @@
-package demo.muhsener01.urlshortener.cache;
+package demo.muhsener01.urlshortener.config;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
