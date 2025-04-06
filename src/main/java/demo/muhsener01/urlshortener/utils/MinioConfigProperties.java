@@ -13,4 +13,6 @@ public class MinioConfigProperties {
     private String user;
     private String password;
     private String bucketName;
+    private int linkExpirationInMinutes;
+    private String objectPrefix;
 }

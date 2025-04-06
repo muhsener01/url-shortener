@@ -1,12 +1,18 @@
 services:
-  #  app:
-  #    image: muhsener98/urlshortener:0.0.1-SNAPSHOT
-  #    container_name: my-urlshortener
-  #    restart: always
-  #    ports:
-  #      - "8080:8080"
-  #    depends_on:
-  #      - db
+
+#  app:
+#    image: muhsener98/urlshortener:0.0.1
+#    container_name: shortener-app
+#    env_file:
+#      - ./.env
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      postgresql:
+#        condition: service_healthy
+#    networks:
+#      - shortener-net
+
   redis:
     image: redis:latest
     container_name: my-redis
@@ -15,17 +21,28 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-  db:
+    networks:
+      - shortener-net
+
+  postgresql:
     image: postgres:latest
     restart: always
     environment:
       POSTGRES_DB: shortener
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - shortener-net
+
   minio:
     image: quay.io/minio/minio
     container_name: minio
@@ -36,10 +53,16 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     command: server /data --console-address ":9090"
+    networks:
+      - shortener-net
     volumes:
       - minio_data:/data
+
 volumes:
   postgres_data:
   redis_data:
   minio_data:
 
+
+networks:
+  shortener-net:

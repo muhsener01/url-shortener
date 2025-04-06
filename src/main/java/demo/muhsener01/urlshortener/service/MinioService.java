@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -47,9 +48,14 @@ public class MinioService {
     }
 
 
-    public String putObject(String uniqueKey, MultipartFile multipartFile) {
+    private String getObjectName(String uniqueKey) {
+        return minioConfigProperties.getObjectPrefix() + "-" + uniqueKey;
+    }
+
+    public void putObject(String uniqueKey, MultipartFile multipartFile) {
         try (InputStream inputStream = multipartFile.getInputStream()) {
-            String objectName = multipartFile.getOriginalFilename() + "-" + uniqueKey;
+            String objectName = getObjectName(uniqueKey);
+
 
             minioClient.putObject(
                     PutObjectArgs.builder()
@@ -60,11 +66,6 @@ public class MinioService {
                             .build());
 
 
-            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
-                    .method(Method.GET)
-                    .bucket(minioConfigProperties.getBucketName())
-                    .object(objectName)
-                    .build());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -73,4 +74,17 @@ public class MinioService {
     }
 
 
+    public String getPreSignedUrl(String uniqueKey) {
+        String objectName = getObjectName(uniqueKey);
+        try {
+            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                    .method(Method.GET)
+                    .bucket(minioConfigProperties.getBucketName())
+                    .object(objectName)
+                    .expiry(minioConfigProperties.getLinkExpirationInMinutes(), TimeUnit.MINUTES)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

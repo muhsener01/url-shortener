@@ -14,12 +14,17 @@ spring:
   jpa:
     database: postgresql
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     open-in-view: false
     show-sql: false
     properties:
       hibernate:
         format_sql: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
 
 
 minio:
@@ -27,11 +32,13 @@ minio:
   user: ${MINIO_USER:minioadmin}
   password: ${MINIO_PASSWORD:minioadmin}
   bucket-name: ${MINIO_BUCKET_NAME:shortenly}
+  link-expiration-in-minutes: ${MINIO_LINK_EXPIRATION_IN_MINUTES:5}
+  object-prefix: ${MINIO_OBJECT_PREFIX:file}
 
 
 security:
   login-url: /api/v1/auth/login
-  secret-key: ${TOKEN_SECRET_KEY:12o38aSJKHASD8AS7DASKJH} #TODO: Delete default key.
+  secret-key: ${TOKEN_SECRET_KEY:12o38aSJKHASDasdkajslkdajslkdjaslkdjalskd8AS7DASKJH}
   token-expiration-time: ${TOKEN_EXPIRATION_TIME:86400000}
   token-prefix: ${TOKEN_PREFIX:Bearer }
 

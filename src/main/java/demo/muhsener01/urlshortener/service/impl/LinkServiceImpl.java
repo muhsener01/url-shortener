@@ -8,8 +8,8 @@ import demo.muhsener01.urlshortener.domain.entity.expiration.ExpirationPolicy;
 import demo.muhsener01.urlshortener.domain.enums.LinkStatus;
 import demo.muhsener01.urlshortener.domain.enums.LinkType;
 import demo.muhsener01.urlshortener.domain.factory.ExpirationPolicyFactory;
-import demo.muhsener01.urlshortener.exception.NoPermissionException;
 import demo.muhsener01.urlshortener.exception.LinkNotFoundException;
+import demo.muhsener01.urlshortener.exception.NoPermissionException;
 import demo.muhsener01.urlshortener.io.response.ResolveResponse;
 import demo.muhsener01.urlshortener.mapper.LinkMapper;
 import demo.muhsener01.urlshortener.repository.UrlRepository;
@@ -90,11 +90,11 @@ public class LinkServiceImpl implements LinkService {
 
         String uniqueKey = hashingEngine.generateUniqueKey(multipartFile.getOriginalFilename());
 
-        String publicUrl = minioService.putObject(uniqueKey, multipartFile);
+        minioService.putObject(uniqueKey, multipartFile);
 
         ExpirationPolicy expirationPolicy = ExpirationPolicyFactory.create(command.getExpirationPolicy(), command.getAfterHours());
 
-        Link link = new Link(uniqueKey, userPrincipal.getId(), userPrincipal.getEmail(), publicUrl, expirationPolicy, LinkType.IMAGE);
+        Link link = new Link(uniqueKey, userPrincipal.getId(), userPrincipal.getEmail(), uniqueKey, expirationPolicy, LinkType.IMAGE);
 
         urlRepository.save(link);
 
@@ -143,7 +143,12 @@ public class LinkServiceImpl implements LinkService {
         String content = "";
         if (resolved) {
             currentStatus = LinkStatus.ACTIVE.name();
-            content = url.getContent();
+
+            if (url.isImage())
+                content = minioService.getPreSignedUrl(url.getId());
+            else
+                content = url.getContent();
+
 
         } else {
             currentStatus = url.getStatus().name();
