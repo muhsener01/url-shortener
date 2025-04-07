@@ -34,6 +34,8 @@ public class RoleInitializer {
             log.info("Admin Role persisted into database.");
         }
 
+        log.info("Application is ready.");
+
 
     }
 }

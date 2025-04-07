@@ -94,7 +94,7 @@ public class LinkServiceImpl implements LinkService {
 
         ExpirationPolicy expirationPolicy = ExpirationPolicyFactory.create(command.getExpirationPolicy(), command.getAfterHours());
 
-        Link link = new Link(uniqueKey, userPrincipal.getId(), userPrincipal.getEmail(), uniqueKey, expirationPolicy, LinkType.IMAGE);
+        Link link = new Link(uniqueKey, userPrincipal.getId(), userPrincipal.getEmail(), multipartFile.getOriginalFilename(), expirationPolicy, LinkType.IMAGE);
 
         urlRepository.save(link);
 
