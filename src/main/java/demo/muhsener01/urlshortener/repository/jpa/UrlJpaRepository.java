@@ -20,6 +20,6 @@ public interface UrlJpaRepository extends JpaRepository<Link, String> {
     @Query("SELECT u from Link u WHERE u.id = :id AND u.status != 'REMOVED'")
     Optional<Link> findByIdIfNotRemoved(String id);
 
-    @Query("SELECT u from Link u WHERE u.userId= :userId AND u.status != 'REMOVED'")
+    @Query("SELECT u from Link u WHERE u.userId= :userId AND u.status != 'REMOVED' ORDER BY u.createdAt DESC")
     List<Link> findAllByUserIdIfNotRemoved(UUID userId, Pageable pageable);
 }
