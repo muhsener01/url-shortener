@@ -45,8 +45,8 @@ security:
 
 logging:
   level:
+    root: OFF
     demo.muhsener01: ${LOG_LEVEL:INFO}
-    org.springframework.security: ${SECURITY_LOG_LEVEL:INFO}
 
 application:
   properties:

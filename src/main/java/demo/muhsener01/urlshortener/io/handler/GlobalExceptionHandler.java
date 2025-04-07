@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.StringJoiner;
 
 @RestControllerAdvice
 @Slf4j
@@ -31,7 +30,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleUserAlreadyExistsException(UserAlreadyExistsException e, HttpServletRequest request) {
-        logError(e);
         ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), 409, request.getRequestURI(), e.getMessage());
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
@@ -47,7 +45,8 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(AuthenticationRequiredException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationRequiredException(AuthenticationRequiredException exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleAuthenticationRequiredException(AuthenticationRequiredException
+                                                                                       exception, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), 401, request.getRequestURI(), exception.getMessage());
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
@@ -55,7 +54,8 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler({LinkNotFoundException.class, RoleNotFoundException.class, UserNotFoundException.class})
-    public ResponseEntity<ErrorResponse> handleTextNotFoundException(NotFoundException exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleTextNotFoundException(NotFoundException
+                                                                             exception, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), 404, request.getRequestURI(), exception.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
@@ -63,18 +63,16 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception, HttpServletRequest request) {
-//        logError(exception);
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException
+                                                                                       exception, HttpServletRequest request) {
+
 
         Map<String, Object> body = new LinkedHashMap<>();
-        String errorTemplateMessage = "%s: '%s'";
-        StringJoiner stringJoiner = new StringJoiner(", ");
+
         for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
-            stringJoiner.add(errorTemplateMessage.formatted(fieldError.getField(), fieldError.getField().equals("password") ? "****" : fieldError.getRejectedValue()));
             body.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
 
-        log.error("INVALID INPUT ERROR: {} ", stringJoiner.toString());
 
         ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), 400, request.getRequestURI(), "Invalid inputs.", body);
         return ResponseEntity.badRequest().body(errorResponse);
@@ -82,7 +80,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({AuthorizationDeniedException.class, NoPermissionException.class})
-    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(Exception exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(Exception exception, HttpServletRequest
+            request) {
 
 
         ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), 403, request.getRequestURI(), exception.getMessage());
@@ -90,6 +89,14 @@ public class GlobalExceptionHandler {
 
     }
 
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
+        logError(e);
+        ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), 500, request.getRequestURI(), "Internal server error!");
+
+        return ResponseEntity.internalServerError().body(errorResponse);
+    }
 
     @Data
 //    @AllArgsConstructor

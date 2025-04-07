@@ -66,7 +66,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     protected boolean authenticationIsRequired(HttpServletRequest request) {
         String header = extractToken(request);
-        if (header == null || header.isBlank() || !header.startsWith(securityConstants.getTokenPrefix())) return false;
+        if (header == null || header.isBlank() || !header.startsWith(securityConstants.getTokenPrefix()))
+            return false;
 
         return true;
     }

@@ -1,8 +1,9 @@
 package demo.muhsener01.urlshortener.repository.impl;
 
 import demo.muhsener01.urlshortener.domain.entity.MyUser;
-import demo.muhsener01.urlshortener.repository.jpa.UserJpaRepository;
+import demo.muhsener01.urlshortener.exception.DataAccessException;
 import demo.muhsener01.urlshortener.repository.UserRepository;
+import demo.muhsener01.urlshortener.repository.jpa.UserJpaRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -31,14 +32,15 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     @Transactional
-    public MyUser save(MyUser user) {
+    public MyUser save(MyUser user) throws DataAccessException {
         try {
             entityManager.persist(user);
             entityManager.flush();
             return user;
         } catch (Exception e) {
-            log.debug("Error while saving user with ID: {} due to : {} ", user.getId(), e.getMessage(), e);
-            throw e;
+            String message = "Error while saving user with ID: '%s' due to : '%s' ".formatted(user.getId(), e.getMessage());
+            log.debug(message, e);
+            throw new DataAccessException(message, e);
         }
     }
 
