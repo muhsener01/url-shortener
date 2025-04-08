@@ -3,7 +3,6 @@ package demo.muhsener01.urlshortener.config;
 import demo.muhsener01.urlshortener.domain.entity.Role;
 import demo.muhsener01.urlshortener.repository.RoleRepository;
 import demo.muhsener01.urlshortener.repository.impl.UserRepositoryImpl;
-import demo.muhsener01.urlshortener.repository.jpa.UserJpaRepository;
 import demo.muhsener01.urlshortener.security.SecurityConstants;
 import demo.muhsener01.urlshortener.security.filter.JwtAuthenticationFilter;
 import demo.muhsener01.urlshortener.security.handler.CustomAuthEntryPoint;
@@ -38,13 +37,11 @@ import java.util.List;
 public class SecurityConfig {
 
 
-    private final UserJpaRepository userJpaRepository;
     private final RoleRepository roleRepository;
     private final SecurityConstants securityConstants;
     private final UserRepositoryImpl userRepositoryImpl;
     private final CacheService<String, Role> roleCacheService;
     private final ApplicationProperties applicationProperties;
-
 
 
     @Bean
