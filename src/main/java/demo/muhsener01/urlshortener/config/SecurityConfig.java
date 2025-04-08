@@ -43,6 +43,9 @@ public class SecurityConfig {
     private final SecurityConstants securityConstants;
     private final UserRepositoryImpl userRepositoryImpl;
     private final CacheService<String, Role> roleCacheService;
+    private final ApplicationProperties applicationProperties;
+
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -88,7 +91,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(List.of(applicationProperties.getBaseDomain()));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("*"));
