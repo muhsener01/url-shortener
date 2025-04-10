@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class OperationResponse {
+public class LoginResponse {
 
     private String operation;
     private boolean status;
