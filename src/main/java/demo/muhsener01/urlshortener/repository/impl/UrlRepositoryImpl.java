@@ -1,6 +1,8 @@
 package demo.muhsener01.urlshortener.repository.impl;
 
 import demo.muhsener01.urlshortener.domain.entity.Link;
+import demo.muhsener01.urlshortener.shared.dto.GetAllLinkResponse;
+import demo.muhsener01.urlshortener.mapper.LinkMapper;
 import demo.muhsener01.urlshortener.repository.UrlRepository;
 import demo.muhsener01.urlshortener.repository.jpa.UrlJpaRepository;
 import jakarta.persistence.EntityManager;
@@ -8,6 +10,7 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.retry.annotation.Retryable;
@@ -16,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +28,7 @@ import java.util.UUID;
 public class UrlRepositoryImpl implements UrlRepository {
 
     private final UrlJpaRepository urlJpaRepository;
+    private final LinkMapper linkMapper;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -79,11 +82,23 @@ public class UrlRepositoryImpl implements UrlRepository {
     }
 
     @Override
-    public List<Link> findAllByUserIdIfNotRemoved(UUID authenticatedUserId, int page, int limit) {
+    public GetAllLinkResponse findAllByUserIdIfNotRemoved(UUID authenticatedUserId, int page, int limit) {
         Pageable pageable = PageRequest.of(page, limit);
+        Page<Link> result = urlJpaRepository.findAllByUserIdIfNotRemoved(authenticatedUserId, pageable);
 
-        return urlJpaRepository.findAllByUserIdIfNotRemoved(authenticatedUserId, pageable);
+
+        GetAllLinkResponse response = new GetAllLinkResponse();
+        response.setTotalRecords(result.getTotalElements());
+        response.setPage(page);
+        response.setLimit(limit);
+        response.setTotalPages(result.getTotalPages());
+        response.setData(linkMapper.toResponse(result.getContent()));
+
+
+        return response;
+
     }
+
 
     private String hash(String input) {
         try {

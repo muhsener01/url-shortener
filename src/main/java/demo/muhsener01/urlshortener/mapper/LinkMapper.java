@@ -9,7 +9,7 @@ import demo.muhsener01.urlshortener.domain.entity.expiration.SingleUsePolicy;
 import demo.muhsener01.urlshortener.domain.entity.expiration.UntilRemovedPolicy;
 import demo.muhsener01.urlshortener.domain.enums.LinkStatus;
 import demo.muhsener01.urlshortener.domain.factory.ExpirationPolicyFactory;
-import demo.muhsener01.urlshortener.io.response.*;
+import demo.muhsener01.urlshortener.shared.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

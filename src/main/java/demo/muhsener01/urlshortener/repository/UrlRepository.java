@@ -1,8 +1,8 @@
 package demo.muhsener01.urlshortener.repository;
 
 import demo.muhsener01.urlshortener.domain.entity.Link;
+import demo.muhsener01.urlshortener.shared.dto.GetAllLinkResponse;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,7 +20,9 @@ public interface UrlRepository {
 
     Optional<Link> findByIdIfNotRemoved(String id);
 
-    List<Link> findAllByUserIdIfNotRemoved(UUID authenticatedUserId, int page, int limit);
+    GetAllLinkResponse findAllByUserIdIfNotRemoved(UUID authenticatedUserId, int page, int limit);
+
+
 }
 
 

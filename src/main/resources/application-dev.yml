@@ -18,12 +18,18 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
 minio:
-  url: http://localhost:9000
-  user: minioadmin
-  password: minioadmin
-  bucket-name: shortener
+  url: http://${MINIO_HOST:localhost}:${MINIO_PORT:9000}
+  user: ${MINIO_USER:minioadmin}
+  password: ${MINIO_PASSWORD:minioadmin}
+  bucket-name: ${MINIO_BUCKET_NAME:shortenly}
+  link-expiration-in-minutes: ${MINIO_LINK_EXPIRATION_IN_MINUTES:5}
+  object-prefix: ${MINIO_OBJECT_PREFIX:file}
 
 
 security:
@@ -31,6 +37,14 @@ security:
   secret-key: asd9asdkJASD9ASUDASKDJASD0dslj
   token-expiration-time: 604800016
   token-prefix: "Bearer "
+  admin-username: admin
+  admin-email: admin@gmail.com
+  admin-password: admin
+
+rate-limiter:
+  bucket-capacity: ${BUCKET_CAPACITY:30}
+  bucket-refill-interval: ${BUCKET_REFILL_INTERVAL:60000}
+  bucket-refill-tokens: ${BUCKET_REFILL_TOKENS:30}
 
 
 
@@ -40,6 +54,16 @@ logging:
     demo.muhsener01: TRACE
     org.springframework.security: TRACE
 
+
 application:
   properties:
-    base-domain: http://localhost:5173
+    base-domain: ${BASE_URL:http://localhost:5173}
+  info:
+    release:
+      id: ${RELEASE_ID:1}
+      version: ${RELEASE_VERSION:1.0.0}
+      release-type: ${RELEASE_TYPE:BE}
+      release-date: ${RELEASE_DATE:2025-04-15}
+      source: ${RELEASE_SOURCE:https://github.com/muhsener01/shortener}
+      status: ${RELEASE_STATUS:ACTIVE}
+      note: ${RELEASE_NOTE:Initial Release}

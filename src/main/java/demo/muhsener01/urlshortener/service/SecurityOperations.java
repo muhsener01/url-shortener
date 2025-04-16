@@ -19,4 +19,6 @@ public interface SecurityOperations {
     UserPrincipal getAuthenticatedPrincipal();
 
     boolean isUrlOwnerOrAdmin(Link link) throws AuthenticationRequiredException;
+
+    void validateIsAdmin();
 }

@@ -1,4 +1,4 @@
-package demo.muhsener01.urlshortener.io.response;
+package demo.muhsener01.urlshortener.shared.dto;
 
 import lombok.Getter;
 import lombok.Setter;

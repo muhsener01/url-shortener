@@ -15,6 +15,9 @@ public class SecurityConstants {
     private String loginUrl;
     private String secretKey;
     private Long tokenExpirationTime;
+    private String adminUsername;
+    private String adminPassword;
+    private String adminEmail;
 
 
 }

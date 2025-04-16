@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    @ExceptionHandler({LinkNotFoundException.class, RoleNotFoundException.class, UserNotFoundException.class})
+    @ExceptionHandler({LinkNotFoundException.class, RoleNotFoundException.class, UserNotFoundException.class, FeedbackNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleTextNotFoundException(NotFoundException
                                                                              exception, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), 404, request.getRequestURI(), exception.getMessage());

@@ -1,6 +1,6 @@
 package demo.muhsener01.urlshortener.security.handler;
 
-import demo.muhsener01.urlshortener.io.response.OperationResponse;
+import demo.muhsener01.urlshortener.shared.dto.LoginResponse;
 import demo.muhsener01.urlshortener.security.JwtUtils;
 import demo.muhsener01.urlshortener.security.SecurityConstants;
 import demo.muhsener01.urlshortener.security.UserPrincipal;
@@ -34,8 +34,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
         response.addHeader(securityConstants.getHeaderName(), securityConstants.getTokenPrefix() + token);
         response.setStatus(200);
-        OperationResponse operationResponse = new OperationResponse("LOGIN", true);
-        String body = JsonUtils.convertToJson(operationResponse);
+        LoginResponse loginResponse = new LoginResponse(userPrincipal.getId(), userPrincipal.getEmail(), userPrincipal.getUsername());
+        String body = JsonUtils.convertToJson(loginResponse);
 
         response.setContentType("application/json");
         response.getWriter().append(body);

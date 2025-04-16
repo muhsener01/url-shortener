@@ -10,7 +10,8 @@ import demo.muhsener01.urlshortener.domain.enums.LinkType;
 import demo.muhsener01.urlshortener.domain.factory.ExpirationPolicyFactory;
 import demo.muhsener01.urlshortener.exception.LinkNotFoundException;
 import demo.muhsener01.urlshortener.exception.NoPermissionException;
-import demo.muhsener01.urlshortener.io.response.ResolveResponse;
+import demo.muhsener01.urlshortener.shared.dto.GetAllLinkResponse;
+import demo.muhsener01.urlshortener.shared.dto.ResolveResponse;
 import demo.muhsener01.urlshortener.mapper.LinkMapper;
 import demo.muhsener01.urlshortener.repository.UrlRepository;
 import demo.muhsener01.urlshortener.security.UserPrincipal;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -41,11 +41,13 @@ public class LinkServiceImpl implements LinkService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Link> findAllOfAuthenticatedUser(int page, int limit) {
+    public GetAllLinkResponse findAllOfAuthenticatedUser(int page, int limit) {
 
         UUID authenticatedUserId = securityOperations.getAuthenticatedUserId();
 
+
         return urlRepository.findAllByUserIdIfNotRemoved(authenticatedUserId, page, limit);
+
 
     }
 

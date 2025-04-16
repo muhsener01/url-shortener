@@ -5,8 +5,9 @@ import demo.muhsener01.urlshortener.command.ShortenCommand;
 import demo.muhsener01.urlshortener.command.UpdateLinkCommand;
 import demo.muhsener01.urlshortener.command.response.ShorteningResponse;
 import demo.muhsener01.urlshortener.domain.entity.Link;
-import demo.muhsener01.urlshortener.io.response.LinkResponse;
-import demo.muhsener01.urlshortener.io.response.ResolveResponse;
+import demo.muhsener01.urlshortener.shared.dto.GetAllLinkResponse;
+import demo.muhsener01.urlshortener.shared.dto.LinkResponse;
+import demo.muhsener01.urlshortener.shared.dto.ResolveResponse;
 import demo.muhsener01.urlshortener.mapper.LinkMapper;
 import demo.muhsener01.urlshortener.service.LinkService;
 import demo.muhsener01.urlshortener.springdoc.*;
@@ -15,12 +16,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/links")
@@ -51,9 +51,9 @@ public class LinkController {
 
         ShorteningResponse response = null;
         if (inputType.equalsIgnoreCase("url"))
-            response = linkService.shorten("url",command);
+            response = linkService.shorten("url", command);
         else if (inputType.equalsIgnoreCase("text"))
-            response = linkService.shorten("text",command);
+            response = linkService.shorten("text", command);
         else if (inputType.equalsIgnoreCase("image")) {
             if (multipartFile == null)
                 throw new IllegalArgumentException("Multipart file cannot be null when type=image");
@@ -65,9 +65,6 @@ public class LinkController {
 
         return ResponseEntity.ok(response);
     }
-
-
-
 
 
     @ResolveSpringDoc
@@ -111,7 +108,8 @@ public class LinkController {
 
     @FindAllSpringDoc
     @GetMapping
-    public ResponseEntity<List<LinkResponse>> findAll(
+    @ResponseStatus(HttpStatus.OK)
+    public GetAllLinkResponse findAll(
             @Parameter(description = "Page number (zero-based)", example = "0")
             @RequestParam(name = "page", defaultValue = "0") int page,
             @Parameter(description = "Number of items per page (at least 1)", example = "5")
@@ -123,8 +121,8 @@ public class LinkController {
             limit = 10;
         }
 
-        List<Link> allByUserId = linkService.findAllOfAuthenticatedUser(page, limit);
-        return ResponseEntity.ok().body(linkMapper.toResponse(allByUserId));
+        return linkService.findAllOfAuthenticatedUser(page, limit);
+
     }
 
 

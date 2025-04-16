@@ -1,6 +1,6 @@
 package demo.muhsener01.urlshortener.springdoc;
 
-import demo.muhsener01.urlshortener.io.response.LinkResponse;
+import demo.muhsener01.urlshortener.shared.dto.LinkResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;

@@ -2,6 +2,7 @@ package demo.muhsener01.urlshortener.service.impl;
 
 import demo.muhsener01.urlshortener.domain.entity.Link;
 import demo.muhsener01.urlshortener.exception.AuthenticationRequiredException;
+import demo.muhsener01.urlshortener.exception.NoPermissionException;
 import demo.muhsener01.urlshortener.security.UserPrincipal;
 import demo.muhsener01.urlshortener.service.SecurityOperations;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -36,6 +37,16 @@ public class SecurityOperationsImpl implements SecurityOperations {
 
         return (link.getUserId().equals(userPrincipal.getId()) || userPrincipal.isAdmin());
 
+
+    }
+
+    @Override
+    public void validateIsAdmin() throws AuthenticationRequiredException, NoPermissionException {
+        UserPrincipal authenticatedPrincipal = getAuthenticatedPrincipal();
+
+        if (!authenticatedPrincipal.isAdmin()) {
+            throw new NoPermissionException("Forbidden access");
+        }
 
     }
 }
