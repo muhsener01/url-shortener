@@ -1,17 +1,17 @@
 services:
 
-  app:
-    image: muhsener98/urlshortener:1.1.0
-    container_name: shortener-app
-    env_file:
-      - ./.env
-    ports:
-      - "8080:8080"
-    depends_on:
-      postgresql:
-        condition: service_healthy
-    networks:
-      - shortener-net
+#  app:
+#    image: muhsener98/urlshortener:1.1.0
+#    container_name: shortener-app
+#    env_file:
+#      - ./.env
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      postgresql:
+#        condition: service_healthy
+#    networks:
+#      - shortener-net
 
   redis:
     image: redis:latest
